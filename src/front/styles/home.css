@@ -5,3 +5,17 @@
     one more css for each page that will contain the selected used 
     on that page only (the ones not reused in other pages).
 */
+
+/* Fondo de la página de home */
+body {
+    width: 100%; /* Asegura que el body cubra todo el ancho de la ventana */
+    height: 100vh; /* Asegura que el body cubra toda la altura de la ventana */
+    display: flex; /* Usa flexbox para centrar el contenido */
+    align-items: center; /* Centra el contenido verticalmente */
+    justify-content: center; /* Centra el contenido horizontalmente */
+    background-image: url('https://img.freepik.com/vector-gratis/fondo-geometrico-plano_23-2148967370.jpg?t=st=1726657969~exp=1726661569~hmac=6100373cd835e6879903e013ec1f5c9cf1b6f6ebb6e9932e87c8583bdde9d52c&w=1380'); /* URL directa de la imagen */
+    background-size: cover; /* Ajusta el tamaño de la imagen de fondo para cubrir todo el fondo */
+    background-position: center; /* Centra la imagen de fondo */
+    background-repeat: no-repeat; /* Evita que la imagen se repita si es más pequeña que el área de fondo */
+    background-attachment: fixed; /* Mantiene la imagen de fondo fija durante el desplazamiento */
+}

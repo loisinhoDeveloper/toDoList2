@@ -1,0 +1,149 @@
+/* Esta regla se aplica a todos los elementos de la página. */
+* {
+    font-family: "Poppins", sans-serif; /* Establece la fuente de todo el sitio */
+    margin: 0; /* Elimina el margen por defecto */
+    padding: 0; /* Elimina el padding por defecto */
+    box-sizing: border-box; /* Incluye padding y borde en el cálculo del ancho y alto */
+    justify-content: center; /* Centra el contenido horizontalmente */
+}
+
+/* Estilo del contenedor del formulario de registro */
+.ContenedorRegistro {
+    margin-top: 250px;
+    background: rgba(250, 209, 103, 0.2); /* Fondo semitransparente del color #fad167 */
+    width: 320px; /* Ancho fijo del contenedor */
+    padding: 24px; /* Espaciado interno */
+    border-radius: 16px; /* Bordes redondeados */
+    border: solid 5px rgba(255, 255, 255, 0.1); /* Borde con color blanco semi-transparente */
+    backdrop-filter: blur(25px); /* Desenfoque de fondo detrás del contenedor */
+    box-shadow: 0px 0px 30px 20px rgba(79, 205, 197, 0.5); /* Sombra para darle profundidad */
+    color: white; /* Color del texto dentro del contenedor */
+    display: flex; /* Usa flexbox para alinear elementos internos */
+    flex-direction: column; /* Alinea los elementos en una columna */
+    align-items: center; /* Centra los elementos horizontalmente */
+   
+}
+
+/* Estilo del título en el formulario de registro */
+.formularioRegistro h2 {
+    margin-bottom: 16px; /* Espaciado debajo del título */
+    font-size: 24px; /* Tamaño de fuente del título */
+    color: #1a535c;
+}
+
+/* Estilo del contenedor de los inputs */
+.input-registro {
+    display: flex; /* Usa flexbox para alinear los inputs */
+    width: 100%; /* Asegura que el contenedor de los inputs cubra todo el ancho disponible */
+    position: relative; /* Posiciona el icono en relación al input */
+    margin-top: 20px; /* Espaciado arriba del contenedor de inputs */
+}
+
+/* Estilo de los inputs */
+.input-registro input {
+    width: 100%; /* Asegura que el input cubra todo el ancho disponible */
+    padding: 10px 16px 10px 38px; /* Espaciado interno del input (espacio adicional a la izquierda para el icono) */
+    border-radius: 99px; /* Bordes redondeados del input */
+    border: solid 3px transparent; /* Borde transparente que se hace visible al hacer foco */
+    background: rgba(255, 255, 255, 0.1); /* Fondo semi-transparente del input */
+    outline: none; /* Elimina el contorno por defecto del input */
+    caret-color: white; /* Color del cursor de texto */
+    color: #1a535c; 
+    font-weight: 500; /* Grosor de la fuente del texto */
+    transition: 0.25s; /* Tiempo de transición para cambios en el borde */
+}
+
+/* Estilo de los inputs al hacer foco */
+.input-registro input:focus {
+    border: solid 3px #1a535c; /* Cambia el borde al hacer foco */
+}
+
+/* Estilo del placeholder del input */
+.input-registro input::placeholder {
+    color: #1a535c; /* Color del texto del placeholder */
+}
+
+/* Icono dentro del input */
+.input-registro i {
+    position: absolute; /* Posiciona el icono de forma absoluta dentro del contenedor */
+    top: 50%; /* Centra verticalmente el icono */
+    transform: translateY(-50%); /* Ajusta la posición vertical del icono para centrarlo */
+    left: 14px; /* Espaciado desde el borde izquierdo */
+    color: #1a535c; /* Color del icono */
+    font-size: 18px; /* Tamaño del icono */
+    transition: 0.25s; /* Tiempo de transición para cambios en el color del icono */
+}
+
+/* Estilo del icono al hacer foco en el input */
+.input-registro input:focus + i {
+    color: white; /* Cambia el color del icono al hacer foco en el input */
+}
+
+/* Estilo del enlace a la página de login */
+.enlaceLogin {
+    margin-top: 20px;
+    display: flex; /* Usa flexbox para alinear los elementos */
+    width: 100%; /* Asegura que el contenedor cubra todo el ancho disponible */
+    margin-top: 16px; /* Espaciado arriba del contenedor */
+    justify-content: space-between; /* Espacia los elementos en los extremos del contenedor */
+    font-size: 12px; /* Tamaño más pequeño del texto */
+    color: #1a535c; /* Color ligeramente transparente */
+}
+
+/* Estilo del enlace en el texto */
+.enlaceLogin a {
+    color: #4fcdc5; /* Color del enlace */
+    text-decoration: none; /* Elimina el subrayado del enlace */
+}
+
+.enlaceLogin a:hover {
+    text-decoration: underline; /* Añade subrayado al pasar el ratón sobre el enlace */
+}
+
+
+.botRegistro{
+    margin-top: 10px;
+    display: flex; /* Activa Flexbox */
+    align-items: center; /* Centra verticalmente */
+    justify-content: center; /* Centra horizontalmente */
+}
+/* Estilo del botón de registro */
+.botonRegistro {
+    font-size: 20px;
+    color: #1a535c;
+    opacity: 0.45;
+    border: 1px solid rgba(247, 107, 107, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    height: 30px;
+    width: 30px;
+    justify-content: center;
+}
+
+/* Estilo del botón de registro al pasar el ratón sobre él */
+.botonRegistro:hover {
+    background: rgba(250, 209, 103, 0.2); /* Cambia el color de fondo al pasar el ratón sobre el botón */
+    cursor: pointer;
+}
+
+/* movimiento del botón de Registro al pasar el ratón sobre él */
+@keyframes bounce_513 {
+    0%,
+      100% {
+      transform: translateX(-25%);
+      animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+  
+    50% {
+      transform: translateX(0);
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .ContenedorRegistro {
+        width: 100%; /* Asegura que el contenedor de registro cubra todo el ancho en pantallas pequeñas */
+        padding: 15px; /* Reduce el espaciado interno en pantallas pequeñas */
+    }
+}
