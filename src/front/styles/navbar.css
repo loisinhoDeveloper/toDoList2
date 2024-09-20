@@ -1,0 +1,127 @@
+.navbar {
+    background: rgba(26, 84, 93, 0.8); /* Fondo semitransparente en color #1a545d */
+    font-family: "Poppins", sans-serif; /* Establece la fuente Poppins para todo el navbar */
+    display: flex; /* Hace que los elementos dentro del navbar se dispongan en una fila */
+    justify-content: space-between; /* Distribuye los elementos hacia los bordes opuestos (izquierda y derecha) */
+    align-items: center; /* Alinea los elementos verticalmente al centro */
+    padding: 10px 20px; /* Espaciado interno del navbar */
+    margin: 0 15px 15px; /* Sin margen arriba, 15px en los lados, y 15px debajo */
+    border-bottom-left-radius: 15px; /* Bordes redondeados en la esquina inferior izquierda */
+    border-bottom-right-radius: 15px; /* Bordes redondeados en la esquina inferior derecha */
+    width: calc(100% - 30px); /* Asegura que ocupe el ancho total menos los márgenes */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Sombra leve para destacar el navbar */
+    position: relative;
+    z-index: 1000; /* Asegura que el navbar se muestre sobre otros elementos */
+}
+
+/* Logo Styling */
+.navbar .logo {
+    height: 80px; /* Aumenta considerablemente la altura del logo */
+    width: auto; /* Mantiene la proporción del logo */
+    cursor: pointer; /* Cambia el cursor a una mano cuando el usuario pasa sobre el logo */
+}
+
+/* Navbar Buttons Container */
+.navbar-buttons {
+    display: flex; /* Los botones se disponen en una fila */
+    align-items: center; /* Alinea los botones verticalmente al centro */
+}
+
+/* Login and Signup Buttons */
+.btnInicio, .btnRegistro {
+    font-size: 14px; /* Tamaño de fuente más legible */
+    padding: 10px 20px; /* Espaciado interno cómodo para botones */
+    margin-left: 10px; /* Separación entre los botones */
+    border-radius: 5px; /* Bordes redondeados */
+    background-color: #ffffff; /* Fondo blanco para los botones */
+    color: #1a545d; /* Color del texto en verde oscuro */
+    border: 1px solid #1a545d; /* Borde del mismo color que el texto */
+    transition: background-color 0.3s ease; /* Transición suave para el color de fondo al hacer hover */
+}
+
+/* Efecto hover para los botones de login y registro */
+.btnInicio:hover, .btnRegistro:hover {
+    background-color: #1a545d; /* Cambia el fondo al color principal cuando el ratón pasa por encima */
+    color: white; /* Cambia el color del texto a blanco */
+}
+
+.navbar {
+    background: rgba(26, 84, 93, 0.8); /* Fondo semitransparente en color #1a545d */
+    font-family: "Poppins", sans-serif; /* Establece la fuente Poppins para todo el navbar */
+    display: flex; /* Hace que los elementos dentro del navbar se dispongan en una fila */
+    justify-content: space-between; /* Distribuye los elementos hacia los bordes opuestos (izquierda y derecha) */
+    align-items: center; /* Alinea los elementos verticalmente al centro */
+    padding: 10px 20px; /* Espaciado interno del navbar */
+    margin: 0 15px 15px; /* Sin margen arriba, 15px en los lados, y 15px debajo */
+    border-bottom-left-radius: 15px; /* Bordes redondeados en la esquina inferior izquierda */
+    border-bottom-right-radius: 15px; /* Bordes redondeados en la esquina inferior derecha */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Sombra leve para destacar el navbar */
+    position: relative;
+    z-index: 1000; /* Asegura que el navbar se muestre sobre otros elementos */
+}
+
+/* Logo Styling */
+.navbar .logo {
+    height: 80px; /* Aumenta considerablemente la altura del logo */
+    width: auto; /* Mantiene la proporción del logo */
+    cursor: pointer; /* Cambia el cursor a una mano cuando el usuario pasa sobre el logo */
+}
+
+/* Navbar Buttons Container */
+.navbar-buttons {
+    display: flex; /* Los botones se disponen en una fila */
+    align-items: center; /* Alinea los botones verticalmente al centro */
+}
+
+/* Login and Signup Buttons */
+.btnInicio, .btnRegistro {
+    font-size: 14px; /* Tamaño de fuente más legible */
+    padding: 10px 20px; /* Espaciado interno cómodo para botones */
+    margin-left: 10px; /* Separación entre los botones */
+    border-radius: 5px; /* Bordes redondeados */
+    background-color: #ffffff; /* Fondo blanco para los botones */
+    color: #1a545d; /* Color del texto en verde oscuro */
+    border: 1px solid #1a545d; /* Borde del mismo color que el texto */
+    transition: background-color 0.3s ease; /* Transición suave para el color de fondo al hacer hover */
+}
+
+/* Efecto hover para los botones de login y registro */
+.btnInicio:hover, .btnRegistro:hover {
+    background-color: #1a545d; /* Cambia el fondo al color principal cuando el ratón pasa por encima */
+    color: white; /* Cambia el color del texto a blanco */
+}
+
+/* Responsive Design for Medium Screens (Tablets) */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column; /* Cambia la disposición de los elementos a una columna */
+        align-items: flex-start; /* Alinea los elementos al inicio (izquierda) */
+        padding: 10px 15px; /* Ajusta el padding para pantallas más pequeñas */
+    }
+
+    .logo {
+        height: 70px; /* Tamaño adecuado del logo en tablets */
+    }
+
+    .navbar-buttons {
+        margin-top: 10px; /* Añade margen superior a los botones */
+    }
+}
+
+/* Responsive Design for Small Screens (Mobiles) */
+@media (max-width: 480px) {
+    .navbar {
+        padding: 10px; /* Ajusta el padding en pantallas pequeñas */
+        width: calc(100% - 20px); /* Mantiene el ancho total menos los márgenes */
+    }
+
+    .logo {
+        height: 60px; /* Ajusta el tamaño del logo para pantallas pequeñas */
+    }
+
+    .btnInicio, .btnRegistro {
+        font-size: 12px; /* Reduce el tamaño de fuente en móviles */
+        padding: 8px 15px; /* Espaciado interno ajustado */
+        margin-bottom: 5px; /* Añade un margen inferior para separar los botones */
+    }
+}

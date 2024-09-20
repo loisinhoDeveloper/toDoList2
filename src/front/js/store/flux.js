@@ -53,7 +53,9 @@ const getState = ({ getStore, getActions, setStore }) => {
                         if (data.token) { // revisa si el servidor nos dio un token. Si sí, eso significa que el inicio de sesión fue exitoso.
                             localStorage.setItem("token", data.token); // Guardar token en localStorage
                             setStore({ token: data.token });
-                            setStore({ user: data.user }); // Opcional: almacenar información del usuario
+                            
+                            localStorage.setItem('usuarioImage', data.user.photo || 'default-image-url'); // Guardar la imagen del usuario o una imagen predeterminada
+                            setStore({ user: data.user }); // almacenar información del usuario
                             return true; // Login exitoso
                         }
                     } else {
@@ -64,7 +66,13 @@ const getState = ({ getStore, getActions, setStore }) => {
                     console.error("Error del servidor:", error);
                     return false; // Login fallido
                 }
-            },            
+            },
+            
+            // Cerrar sesión
+            logout: () => {
+                localStorage.removeItem('token'); // Elimina el token del localStorage
+                setStore({ user: null, autentificado: false, todos: [] });
+            },
 
 			
 
