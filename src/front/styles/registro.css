@@ -1,28 +1,27 @@
-/* Esta regla se aplica a todos los elementos de la página. */
-* {
-    font-family: "Poppins", sans-serif; /* Establece la fuente de todo el sitio */
-    margin: 0; /* Elimina el margen por defecto */
-    padding: 0; /* Elimina el padding por defecto */
-    box-sizing: border-box; /* Incluye padding y borde en el cálculo del ancho y alto */
-    justify-content: center; /* Centra el contenido horizontalmente */
-}
+
 
 /* Estilo del contenedor del formulario de registro */
 .ContenedorRegistro {
-    margin-top: 250px;
-    background: rgba(250, 209, 103, 0.2); /* Fondo semitransparente del color #fad167 */
-    width: 320px; /* Ancho fijo del contenedor */
+    font-family: "Poppins", sans-serif;
+    margin: 0; /* Elimina el margen por defecto */
     padding: 24px; /* Espaciado interno */
+    background: rgba(250, 209, 103, 0.2); /* Fondo semi-transparente */
+    width: 320px; /* Ancho fijo del contenedor */
     border-radius: 16px; /* Bordes redondeados */
-    border: solid 5px rgba(255, 255, 255, 0.1); /* Borde con color blanco semi-transparente */
-    backdrop-filter: blur(25px); /* Desenfoque de fondo detrás del contenedor */
-    box-shadow: 0px 0px 30px 20px rgba(79, 205, 197, 0.5); /* Sombra para darle profundidad */
-    color: white; /* Color del texto dentro del contenedor */
+    border: solid 5px rgba(255, 255, 255, 0.1); /* Borde semi-transparente */
+    backdrop-filter: blur(25px); /* Desenfoque de fondo */
+    box-shadow: 0px 0px 30px 20px rgba(79, 205, 197, 0.5); /* Sombra */
+    color: white; /* Color del texto */
     display: flex; /* Usa flexbox para alinear elementos internos */
     flex-direction: column; /* Alinea los elementos en una columna */
     align-items: center; /* Centra los elementos horizontalmente */
-   
+    justify-content: center; /* Centra el contenido verticalmente */
+    position: absolute; /* Posiciona el contenedor en relación al padre */
+    top: 50%; /* Centra verticalmente */
+    left: 50%; /* Centra horizontalmente */
+    transform: translate(-50%, -50%); /* Ajusta la posición para centrar */
 }
+
 
 /* Estilo del título en el formulario de registro */
 .formularioRegistro h2 {
@@ -139,11 +138,10 @@
       animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
     }
 }
-
 /* Responsive */
 @media (max-width: 600px) {
     .ContenedorRegistro {
-        width: 100%; /* Asegura que el contenedor de registro cubra todo el ancho en pantallas pequeñas */
-        padding: 15px; /* Reduce el espaciado interno en pantallas pequeñas */
+        width: 90%; /* Ancho más flexible en pantallas pequeñas */
+        padding: 15px; /* Reduce el espaciado interno */
     }
 }

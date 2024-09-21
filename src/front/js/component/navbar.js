@@ -24,11 +24,11 @@ export const Navbar = () => {
     };
 
     return (
-        <nav className="navbar mb-0">
+        <nav className="navbar">
             <Link to="/" className="navbar-brand">
                 <img src={logo} alt="Logo Elearning" className="logo" />
             </Link>
-            <div className="text-overlay">"Los pequeños detalles también cuentan"</div>
+            <div className="text-overlay"></div>
             {logueado ? ( // Si está autenticado
                 <div className="navbar-buttons">
                     <Link to="/perfil" className="btn btn-secondary">
