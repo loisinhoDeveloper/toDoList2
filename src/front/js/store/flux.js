@@ -4,6 +4,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			token: localStorage.getItem('token') || null, // Se debe almacenar en el estado del frontend (y opcionalmente en localStorage). Esto permite que el usuario permanezca autenticado incluso después de cerrar y reabrir el navegador.
 			todos: [], 
             user: [],
+            usuarioLogueado: localStorage.getItem('token') !== null, // Inicializa según si hay un token
 
 
 			
@@ -49,13 +50,18 @@ const getState = ({ getStore, getActions, setStore }) => {
                     });
             
                     if (response.ok) {
-                        const data = await response.json(); //convierte la respuesta del servidor en un formato que podamos usar (en este caso, un objeto con la información del usuario).
-                        if (data.token) { // revisa si el servidor nos dio un token. Si sí, eso significa que el inicio de sesión fue exitoso.
+                        const data = await response.json();
+                        if (data.token) {
                             localStorage.setItem("token", data.token); // Guardar token en localStorage
-                            setStore({ token: data.token });
                             
-                            localStorage.setItem('usuarioImage', data.user.photo || 'default-image-url'); // Guardar la imagen del usuario o una imagen predeterminada
-                            setStore({ user: data.user }); // almacenar información del usuario
+                            // Actualiza el store con el token, estado de login y la información del usuario
+                            setStore({ 
+                                token: data.token, 
+                                usuarioLogueado: true, 
+                                user: data.user // Almacena la información del usuario
+                            });
+            
+                            localStorage.setItem('usuarioImage', data.user.photo || 'default-image-url');
                             return true; // Login exitoso
                         }
                     } else {
@@ -71,14 +77,14 @@ const getState = ({ getStore, getActions, setStore }) => {
             // Cerrar sesión
             logout: () => {
                 localStorage.removeItem('token'); // Elimina el token del localStorage
-                setStore({ user: null, autentificado: false, todos: [] });
+                setStore({ user: null, usuarioLogueado: false, todos: [] });
             },
 
 			
 
 			obtenerTareas: () => {
                 const token = getStore().token;
-                const BACKEND_URL = process.env.BACKEND_URL; // Asegúrate de que esté definido en tu entorno
+                const BACKEND_URL = process.env.BACKEND_URL; 
             
                 fetch(`${BACKEND_URL}/api/tareas`, { // URL del endpoint de tareas
                     method: "GET",
@@ -94,6 +100,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     return response.json(); // Convertimos la respuesta a JSON
                 })
                 .then(data => {
+                    console.log("Datos recibidos:", data); //  para ver qué se devuelve
                     // Si el objeto de respuesta es un array de tareas, guardamos directamente
                     setStore({ todos: data });
                 })
@@ -103,15 +110,35 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 			// Añadir una nueva tarea
             añadirTarea: (nuevaTarea) => {
-                const store = getStore();
-                const actualizarTodos = [...store.todos, nuevaTarea]; // Añadir la nueva tarea a la lista de tareas actual
-                setStore({ todos: actualizarTodos }); // Actualizar el estado local
-                getActions().sincroConServidor(actualizarTodos); // Sincronizar con el servidor
+                const BACKEND_URL = process.env.BACKEND_URL; 
+                fetch(`${BACKEND_URL}/api/tareas`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${getStore().token}` // Añadir el token JWT
+                    },
+                    body: JSON.stringify(nuevaTarea)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Error al añadir la tarea");
+                    }
+                    return response.json(); // Obtengo la tarea creada con el ID
+                })
+                .then(tareaCreada => {
+                    const store = getStore();
+                    const actualizarTodos = [...store.todos, tareaCreada]; // Añadir la nueva tarea con ID
+                    setStore({ todos: actualizarTodos }); // Actualizar el estado local
+                })
+                .catch(error => console.log("Error al añadir la tarea:", error));
             },
+            
 
            // Eliminar una tarea por ID y su índice en la lista local
             eliminarTarea: (index, id) => {
+                console.log("ID de la tarea:", id); // Verifica el ID aquí
                 const BACKEND_URL = process.env.BACKEND_URL; // Asegúrate de que esté definido
+                console.log("URL del backend:", BACKEND_URL);
 
                 fetch(`${BACKEND_URL}/api/tareas/${id}`, {
                     method: "DELETE",
@@ -122,6 +149,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                 })
                 .then(() => {
                     const store = getStore();
+                    console.log("Lista de tareas antes de eliminar:", store.todos);
                     const nuevaListaDeTareas = store.todos.filter((_, i) => i !== index); // Filtrar para eliminar la tarea por su índice
                     setStore({ todos: nuevaListaDeTareas }); // Actualizar la lista local
                     getActions().sincroConServidor(nuevaListaDeTareas); // Sincronizar con el servidor
@@ -132,7 +160,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 
                         // Borrar todas las tareas
             borrarTodasLasTareas: () => {
-                const BACKEND_URL = process.env.BACKEND_URL; // Asegúrate de que esté definido
+                const BACKEND_URL = process.env.BACKEND_URL; 
 
                 fetch(`${BACKEND_URL}/api/tareas`, {
                     method: "DELETE",
@@ -151,11 +179,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 			// Sincronizar la lista de tareas actual con el servidor
             sincroConServidor: (actualizarTodos) => {
-                const BACKEND_URL = process.env.BACKEND_URL; // Asegúrate de que esté definido
+                const BACKEND_URL = process.env.BACKEND_URL; 
 
                 fetch(`${BACKEND_URL}/api/tareas`, {
                     method: "PUT",
-                    body: JSON.stringify(actualizarTodos), // Enviar la lista actualizada de tareas al servidor
+                    body: JSON.stringify(actualizarTodos), // Enviamos la lista actualizada de tareas al servidor
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${getStore().token}` // Añadir el token JWT
@@ -167,7 +195,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     }
                     return response.json();
                 })
-                .then(data => console.log("Lista sincronizada con el servidor:", data)) // Confirmar la sincronización
+                .then(data => console.log("Lista sincronizada con el servidor:", data))
                 .catch(error => console.log("Error al sincronizar con el servidor: ", error));
             },
 			

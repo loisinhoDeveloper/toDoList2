@@ -10,6 +10,10 @@ import Login from "./pages/login";
 import Signup from "./pages/registro";
 import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
+import Tareas from "./pages/tareas";
+import AccesoTareas from "./component/acceso_Tareas.jsx"; 
+
+
 
 
 //create your first component
@@ -38,6 +42,7 @@ const Layout = () => {
                         <Route element={<Home />} path="/" />
                         <Route element={<Login />} path="/login" />
                         <Route element={<Signup />} path="/signup" />
+                        <Route element={<AccesoTareas listaTareas={<Tareas />} />} path="/tareas" />{/* Protección para solo los logueados puedan entrar. */}
                         <Route element={<h1>Not found!</h1>} />
                     </Routes>
                     <Footer />

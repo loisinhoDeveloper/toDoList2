@@ -13,13 +13,9 @@ const Login = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault(); // Evitar que el formulario se envíe de forma predeterminada
-        
-        // Llamamos a la acción de login desde flux
-        const exitoso = await actions.login(email, password);
-
-        // Si el login fue exitoso (por ejemplo, si se obtiene el token), redirigir a /tareas
+        const exitoso = await actions.login(email, password); // Llama a la acción de login
         if (exitoso) {
-            navigate("/tareas");
+            navigate("/tareas"); // Redirige a /tareas si el login es exitoso
         } else {
             console.log("Error en el inicio de sesión");
         }

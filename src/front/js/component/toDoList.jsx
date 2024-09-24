@@ -32,7 +32,11 @@ const ToDoLis = () => {
                 {Array.isArray(store.todos) && store.todos.map((tarea, index) => ( //Asegura que store.todos es una lista antes de intentar mostrarla y toma cada tarea de la lista y crea un elemento de lista para ella.
                     <li key={tarea.id || index} className="list-group-item d-flex justify-content-between align-items-center"> {/* un identificador único para cada tarea para ayudar a React */}
                         {tarea.label}
-                        <button onClick={() => actions.eliminarTarea(index, tarea.id)} className="btn btn-danger">Eliminar</button>
+                                    <button onClick={() => {
+                                        console.log("ID de la tarea:", tarea.id); // Verificar el ID aquí
+                                        actions.eliminarTarea(index, tarea.id);
+                                    }} className="btn btn-danger">Eliminar</button>
+
                     </li>
                 ))}
             </ul>
