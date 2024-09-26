@@ -1,10 +1,13 @@
+//Este paso almacena el token en el localStorage del navegador, lo que permite que el token persista incluso si el usuario recarga la página o cierra el navegador. 
+//Es útil para mantener la sesión activa entre recargas.
+
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
 			token: localStorage.getItem('token') || null, // Se debe almacenar en el estado del frontend (y opcionalmente en localStorage). Esto permite que el usuario permanezca autenticado incluso después de cerrar y reabrir el navegador.
-			todos: [], 
-            user: [],
+            user: null, // null para representar que no hay usuario inicialmente
             usuarioLogueado: localStorage.getItem('token') !== null, // Inicializa según si hay un token
+            todos_user:[],// Almacena las tareas del usuario actual
 
 
 			
@@ -14,8 +17,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 			crearUsuario: async (formData) => {
                 try {
-                     // Enviamos una solicitud al servidor para crear un nuevo usuario
-                    const response = await fetch(`${process.env.BACKEND_URL}/api/signup`, {
+                    // Enviamos una solicitud al servidor para crear un nuevo usuario
+                    const response = await fetch(process.env.BACKEND_URL + '/api/signup', {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"
@@ -23,12 +26,15 @@ const getState = ({ getStore, getActions, setStore }) => {
                         body: JSON.stringify(formData) // Enviar los datos del usuario
                     });
             
+                    // Verificamos si la respuesta fue exitosa
                     if (response.ok) {
                         const data = await response.json();
                         console.log("Usuario creado:", data);
                         return true; // Registro exitoso
                     } else {
-                        console.error("Error al crear el usuario");
+                        // Manejo de errores
+                        const errorData = await response.json(); // Obtén el mensaje de error del servidor
+                        console.error("Error al crear el usuario:", errorData.message || 'Error desconocido');
                         return false; // Registro fallido
                     }
                 } catch (error) {
@@ -36,102 +42,136 @@ const getState = ({ getStore, getActions, setStore }) => {
                     return false; // Registro fallido
                 }
             },
-
+            
 
             login: async (email, password) => { 
                 try {
-                     // Enviamos una solicitud al servidor para iniciar sesión
-                     const response = await fetch(`${process.env.BACKEND_URL}/api/login`, { //hasta que esto termine
+                    // Enviamos una solicitud al servidor para iniciar sesión
+                    const response = await fetch(process.env.BACKEND_URL + '/api/login', {
                         method: "POST",
-                        body: JSON.stringify({ email, password }), //convierte nuestro correo y contraseña en un formato que el servidor puede entender.
                         headers: {
                             "Content-Type": "application/json"
-                        }
+                        },
+                        body: JSON.stringify({ email, password }), // Convierte nuestro correo y contraseña en un formato que el servidor puede entender.
                     });
             
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.token) {
-                            localStorage.setItem("token", data.token); // Guardar token en localStorage
-                            
-                            // Actualiza el store con el token, estado de login y la información del usuario
-                            setStore({ 
-                                token: data.token, 
-                                usuarioLogueado: true, 
-                                user: data.user // Almacena la información del usuario
-                            });
+                    const data = await response.json();
+                    console.log('Response data:', data);
             
-                            localStorage.setItem('usuarioImage', data.user.photo || 'default-image-url');
-                            return true; // Login exitoso
-                        }
+                    if (response.ok) {
+                        localStorage.setItem("token", data.token);  // Guardar token en el localStorage
+                        setStore({ token: data.token, user: data.user }); //almaceno el token y la información usuario (id entre otros)... que regresa del backend en el estado global con setStore.
+                        await getActions().obtenerTareas();  // Llama a obtenerTareas después de iniciar sesión
+                        return { success: true, message: "Login exitoso" };
                     } else {
-                        console.error("Error al iniciar sesión");
-                        return false; // Login fallido
+                        return { success: false, message: data.message || "Error en el login" };
                     }
-                } catch (error) { //es como una red de seguridad. Si algo sale mal (por ejemplo, si el servidor no responde)
-                    console.error("Error del servidor:", error);
-                    return false; // Login fallido
+                } catch (error) {
+                    console.error("Error en login:", error);
+                    return { success: false, message: "Error en el servidor" };
                 }
             },
+            
             
             // Cerrar sesión
             logout: () => {
                 localStorage.removeItem('token'); // Elimina el token del localStorage
-                setStore({ user: null, usuarioLogueado: false, todos: [] });
+                setStore({ user: null, usuarioLogueado: false, todos_user: [] }); // Limpia el estado de tareas y usuario
             },
 
 			
 
-			obtenerTareas: () => {
-                const token = getStore().token;
-                const BACKEND_URL = process.env.BACKEND_URL; 
-            
-                fetch(`${BACKEND_URL}/api/tareas`, { // URL del endpoint de tareas
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}` // Añadimos el token JWT en el header
+			// Obtener las tareas del usuario. Envía una solicitud GET al backend para obtener las tareas del usuario autenticado, y luego actualiza el estado global (todos_user) con las tareas obtenidas.
+            obtenerTareas: async () => {
+                try {
+                    const response = await fetch(process.env.BACKEND_URL + '/api/tareas', {
+                        method: "GET",
+                        headers: {
+                           "Authorization": `Bearer ${getStore().token}` // Añadir el token JWT
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        // Si se obtienen las tareas correctamente, actualiza el estado
+                        setStore({
+                            todos_user: data.tareas // Actualiza el estado solo con las tareas del usuario autenticado
+                        });
+                        console.log('Tareas obtenidas satisfactoriamente:', data.tareas);
+                    } else {
+                        // Manejo de errores
+                        console.error('Error al obtener las tareas:', data.msg);
                     }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error en la obtención de las tareas');
-                    }
-                    return response.json(); // Convertimos la respuesta a JSON
-                })
-                .then(data => {
-                    console.log("Datos recibidos:", data); //  para ver qué se devuelve
-                    // Si el objeto de respuesta es un array de tareas, guardamos directamente
-                    setStore({ todos: data });
-                })
-                .catch(error => console.log("Error al obtener tareas:", error));
+                } catch (error) {
+                    console.error('Error en la solicitud:', error);
+                }
             },
+            
             
 
-			// Añadir una nueva tarea
-            añadirTarea: (nuevaTarea) => {
+            // Añadir una nueva tarea. solicitud POST al endpoint /api/tareas con los datos de la nueva tarea.
+            //Usa el token JWT almacenado en el store para la autenticación.
+            //Si la tarea se añade correctamente, se actualiza el estado (todos_user).
+            añadirTarea: async (nuevaTarea) => {
+                try {
+                    const response = await fetch(process.env.BACKEND_URL + '/api/tareas', {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${getStore().token}` // Añadir el token JWT
+                        },
+                        body: JSON.stringify(nuevaTarea)
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        // Si la tarea se añade correctamente, actualiza el estado
+                        setStore({
+                            todos_user: [...getStore().todos_user, data.tarea] // Añadir la nueva tarea al estado
+                        });
+                        console.log('Tarea añadida satisfactoriamente:', data);
+                    } else {
+                        // Manejo de errores
+                        console.error('Error al añadir la tarea:', data.msg);
+                    }
+                } catch (error) {
+                    console.error('Error en la solicitud:', error);
+                }
+            },
+
+
+            // Función para editar una tarea existente. Es decir, solicitud PUT al endpoint del backend y actualiza el estado del frontend con la nueva información de la tarea actualizada.
+            actualizarTarea: (id, datosActualizados) => {
                 const BACKEND_URL = process.env.BACKEND_URL; 
-                fetch(`${BACKEND_URL}/api/tareas`, {
-                    method: "POST",
+                                    
+                fetch(`${BACKEND_URL}/api/tareas/${id}`, {
+                    method: 'PUT',
                     headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${getStore().token}` // Añadir el token JWT
-                    },
-                    body: JSON.stringify(nuevaTarea)
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${getStore().token}`, // Obtener el token del store y añadir
+                            },
+                    body: JSON.stringify(datosActualizados), // Manda los nuevos datos (label y descripcion) del toDoList.jsx
+                    
                 })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error("Error al añadir la tarea");
+                        throw new Error(`Error: ${response.status} - ${response.statusText}`);
                     }
-                    return response.json(); // Obtengo la tarea creada con el ID
+                    return response.json(); // Obtengo la tarea actualizada
                 })
-                .then(tareaCreada => {
+                .then(tareaActualizada => {
                     const store = getStore();
-                    const actualizarTodos = [...store.todos, tareaCreada]; // Añadir la nueva tarea con ID
-                    setStore({ todos: actualizarTodos }); // Actualizar el estado local
+                    const tareasActualizadas = store.todos_user.map(tarea => 
+                        tarea.id === tareaActualizada.tarea.id ? tareaActualizada.tarea : tarea
+                    ); // Actualiza la tarea en el estado
+                    setStore({ todos_user: tareasActualizadas }); // Devuelve la tarea actualizada al frontend en el estado local del flux con tarea.label = label (titulo) y tarea.descripcion = descripcion (routes.py)
                 })
-                .catch(error => console.log("Error al añadir la tarea:", error));
+                .catch(error => console.log("Error al actualizar la tarea:", error));
             },
+                                    
+            
             
 
            // Eliminar una tarea por ID y su índice en la lista local
@@ -150,9 +190,9 @@ const getState = ({ getStore, getActions, setStore }) => {
                 .then(() => {
                     const store = getStore();
                     console.log("Lista de tareas antes de eliminar:", store.todos);
-                    const nuevaListaDeTareas = store.todos.filter((_, i) => i !== index); // Filtrar para eliminar la tarea por su índice
-                    setStore({ todos: nuevaListaDeTareas }); // Actualizar la lista local
-                    getActions().sincroConServidor(nuevaListaDeTareas); // Sincronizar con el servidor
+                    const nuevaListaDeTareas = store.todos_user.filter((_, i) => i !== index); // Filtrar para eliminar la tarea por su índice
+                    setStore({ todos_user: nuevaListaDeTareas }); // Actualizar la lista local
+                    // No es necesario llamar a actualizarTarea porque ya está limpiando el store.
                 })
                 .catch(error => console.log("Error al eliminar la tarea: ", error));
             },
@@ -170,34 +210,34 @@ const getState = ({ getStore, getActions, setStore }) => {
                     }
                 })
                 .then(() => {
-                    setStore({ todos: [] }); // Limpiar todas las tareas del estado local
-                    getActions().sincroConServidor([]); // Sincronizar con el servidor
+                    setStore({ todos_user: [] }); // Limpiar todas las tareas del estado local
+                      // No es necesario llamar a actualizarTarea porque ya está limpiando el store.
                 })
                 .catch(error => console.log("Error al borrar todas las tareas: ", error));
             },
 
 
-			// Sincronizar la lista de tareas actual con el servidor
-            sincroConServidor: (actualizarTodos) => {
-                const BACKEND_URL = process.env.BACKEND_URL; 
+			// // Sincronizar la lista de tareas actual con el servidor para una funcion de administrador, pero hay que conectar con routes.py!
+            // sincroConServidor: (actualizarTodos) => {
+            //     const BACKEND_URL = process.env.BACKEND_URL; 
 
-                fetch(`${BACKEND_URL}/api/tareas`, {
-                    method: "PUT",
-                    body: JSON.stringify(actualizarTodos), // Enviamos la lista actualizada de tareas al servidor
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${getStore().token}` // Añadir el token JWT
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error al sincronizar con el servidor');
-                    }
-                    return response.json();
-                })
-                .then(data => console.log("Lista sincronizada con el servidor:", data))
-                .catch(error => console.log("Error al sincronizar con el servidor: ", error));
-            },
+            //     fetch(`${BACKEND_URL}/api/tareas`, {
+            //         method: "PUT",
+            //         body: JSON.stringify(actualizarTodos), // Enviamos la lista actualizada de tareas al servidor
+            //         headers: {
+            //             "Content-Type": "application/json",
+            //             "Authorization": `Bearer ${getStore().token}` // Añadir el token JWT
+            //         }
+            //     })
+            //     .then(response => {
+            //         if (!response.ok) {
+            //             throw new Error('Error al sincronizar con el servidor');
+            //         }
+            //         return response.json();
+            //     })
+            //     .then(data => console.log("Lista sincronizada con el servidor:", data))
+            //     .catch(error => console.log("Error al sincronizar con el servidor: ", error));
+            // },
 			
 		}
 	};

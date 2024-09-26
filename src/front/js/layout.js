@@ -11,7 +11,7 @@ import Signup from "./pages/registro";
 import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
 import Tareas from "./pages/tareas";
-import AccesoTareas from "./component/acceso_Tareas.jsx"; 
+import AccesoTareas from "./component/acceso_Tareas.jsx"; //actúa como un "guardia" para la ruta que muestra Tareas (layout)
 
 
 

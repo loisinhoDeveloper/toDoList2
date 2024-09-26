@@ -85,72 +85,155 @@ def login():
     }), 401
 
 
+# @api.route('/perfil/<int:id>', methods=['PUT'])
+# @jwt_required()
+# def editar_perfil(id):
+#     edited_user = User.query.get(id)
+#     data=request.json
+#     edited_user.email = data.get('email', None) if data.get('email') else edited_user.email
+#     edited_user.password = data.get('password', None) if data.get('password') else edited_user.password
+
+#     db.session.commit()
+#     return jsonify(edited_user.serialize()), 200
 
 
-
-
-# Devuelve todas las tareas asociadas al usuario que ha iniciado sesión.
-@api.route('/tareas', methods=['GET'])
-@jwt_required()
-def obtener_Tareas():
-
-    user_id_autenticado = get_jwt_identity()  # Obtén el ID del usuario autenticado
-    tareas = Tarea.query.filter_by(user_id=user_id_autenticado).all()  # Consulta las tareas en la base de datos filtradas por el ID del usuario.
-
-    return jsonify([tarea.serialize() for tarea in tareas]), 200  # Devuelve una lista de tareas en formato JSON.
-
-
-
-
-# Endpoint para agregar una nueva tarea
+#AÑADIR TAREA
 @api.route('/tareas', methods=['POST'])
 @jwt_required()  # Solo usuarios autenticados pueden acceder
 def añadir_Tarea():
+    try:
+        data = request.json  # Obtiene los datos de la petición
+        user_id = get_jwt_identity()  # ID del usuario autenticado
+        
+        # Verifica si el usuario existe
+        usuario = User.query.get(user_id)  # Obtiene el usuario por su ID
+        if not usuario:
+            return jsonify({"success": False, "msg": "No se encontró el usuario"}), 404
+        
+        # Extrae los datos de la tarea
+        label = data.get('label')
+        done = data.get('done', False)  # Valor por defecto False si no se proporciona
+        descripcion = data.get('descripcion', None) # La descripción es opcional
 
-    user_id_autenticado = get_jwt_identity()  # ID del usuario autenticado
-    body = request.get_json()  # Obtiene los datos de la petición
-    nuevaTarea = Tarea(label=body['label'], done=False, user_id=user_id_autenticado)  # Crea una nueva tarea
+        # Verifica si la tarea ya existe
+        if Tarea.query.filter_by(label=label, user_id=user_id).first():
+            return jsonify({'success': False, 'msg': 'La tarea ya existe, escribe otra'}), 400
+        
+        # Crea una nueva tarea
+        nueva_tarea = Tarea(label=label, done=done, descripcion=descripcion, user_id=user_id)
+        
+        # Añade la tarea a la base de datos
+        db.session.add(nueva_tarea)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'msg': 'Tarea creada satisfactoriamente', 'tarea': nueva_tarea.serialize()}), 201
+
+    except Exception as e:
+        print('Error:', e)  # Para el log
+        return jsonify({"success": False, "msg": "Error al crear la tarea"}), 500  # Código 500 para error interno del servidor
 
 
-    db.session.add(nuevaTarea)  # Añade la tarea a la base de datos
-    db.session.commit()  # Guarda los cambios
-    return jsonify(nuevaTarea.serialize()), 201  # Devuelve la nueva tarea en formato JSON
+#  método GET para obtener todas las tareas del usuario autenticado a través del token JWT, devolviendo las tareas en formato JSON.
+@api.route('/tareas', methods=['GET'])
+@jwt_required()
+def obtener_tareas():
+    user_id = get_jwt_identity()  # el ID del usuario autenticado desde el token
+    print(f"ID del usuario autenticado: {user_id}")  # Para verificar el ID
+
+    try:
+        tareas_usuario = Tarea.query.filter_by(user_id=user_id).all()  # Obtiene solo las tareas que pertenecen al usuario autenticado
+
+        if not tareas_usuario:
+            return jsonify({"message": "No se encontraron tareas para este usuario"}), 404
+        
+        # Serializa las tareas y las devuelve en formato JSON
+        return jsonify({'success': True, 'tareas': [tarea.serialize() for tarea in tareas_usuario]}), 200
+
+
+    except Exception as e:
+        print("Error al obtener tareas:", e)  # Log del error
+        return jsonify({"message": "Error al obtener las tareas"}), 500  # Error del servidor
+    
+
+
+
+
+
+# Endpoint para editar una tarea existente.  Solicitud PUT para editar una tarea, se valida que la tarea pertenezca al usuario autenticado y se actualizan los campos correspondientes.
+@api.route('/tareas/<int:tarea_id>', methods=['PUT'])
+@jwt_required()  # solo usuarios autenticados puedan actualizar tareas
+def actualizar_tarea(tarea_id):
+    try:
+        data = request.json  # Obtiene los datos de la petición
+        user_id = get_jwt_identity()  # ID del usuario autenticado
+
+        # Verifica si la tarea existe y pertenece al usuario autenticado
+        tarea = Tarea.query.filter_by(id=tarea_id, user_id=user_id).first()
+        if not tarea:
+            return jsonify({"success": False, "msg": "Tarea no encontrada o no pertenece al usuario"}), 404
+
+        # Extrae los nuevos datos de la tarea
+        label = data.get('label')
+        descripcion = data.get('descripcion')
+
+        # Se comprueba si se proporcionan nuevos valores para label y descripcion. Si están presentes, se actualizan en la tarea.
+        if label is not None:
+            tarea.label = label
+        if descripcion is not None:
+            tarea.descripcion = descripcion
+
+        # Guarda los cambios en la base de datos
+        db.session.commit()
+
+        return jsonify({'success': True, 'msg': 'Tarea actualizada satisfactoriamente', 'tarea': tarea.serialize()}), 200
+
+    except Exception as e:
+        print('Error:', e)  # Para el log
+        return jsonify({"success": False, "msg": "Error al actualizar la tarea"}), 500  # Código 500 para error interno del servidor
+
+
 
 
 
 
 # Endpoint para eliminar una tarea
 @api.route('/tareas/<int:tarea_id>', methods=['DELETE'])
-@jwt_required()
+@jwt_required()  # Solo usuarios autenticados pueden acceder
 def eliminar_tarea(tarea_id):
+    try:
+        user_id = get_jwt_identity()  # ID del usuario autenticado
 
-    user_id_autenticado = get_jwt_identity()  # ID del usuario autenticado
-    tarea = Tarea.query.filter_by(id=tarea_id, user_id=user_id_autenticado).first()  # Busca la tarea del usuario autenticado
-    if not tarea:
-        return jsonify({"message": "Tarea no encontrada"}), 404  # Devuelve error si no se encuentra la tarea
-    
+        # Verifica si la tarea existe y pertenece al usuario autenticado
+        tarea = Tarea.query.filter_by(id=tarea_id, user_id=user_id).first()
+        if not tarea:
+            return jsonify({"success": False, "msg": "Tarea no encontrada o no pertenece al usuario"}), 404
+        
+        # Elimina la tarea de la base de datos
+        db.session.delete(tarea)
+        db.session.commit()
 
-    db.session.delete(tarea)  # Elimina la tarea
-    db.session.commit()  # Guarda los cambios
-    return jsonify({"message": "Tarea eliminada"}), 200
+        return jsonify({'success': True, 'msg': 'Tarea eliminada satisfactoriamente'}), 200
+
+    except Exception as e:
+        print('Error:', e)  # Para el log
+        return jsonify({"success": False, "msg": "Error al eliminar la tarea"}), 500  # Código 500 para error interno del servidor
 
 
 
 
-# Endpoint para borrar todas las tareas
+# Endpoint para borrar todas las tareas del usuario autenticado
 @api.route('/tareas', methods=['DELETE'])
 @jwt_required()  # Solo usuarios autenticados pueden acceder
-def borrar_Todas_Las_Tareas():
+def borrar_todas_las_tareas():
+    user_id = get_jwt_identity()  # ID del usuario autenticado
+    tareas = Tarea.query.filter_by(user_id=user_id).all()  # Filtra tareas por usuario
+    
+    if not tareas:
+        return jsonify({"success": False, "msg": "No hay tareas para eliminar"}), 404  # Mensaje si no hay tareas
 
-    user_id_autenticado = get_jwt_identity()  # ID del usuario autenticado
-    tareas = Tarea.query.filter_by(user_id=user_id_autenticado).all()  # Obtiene todas las tareas del usuario
     for tarea in tareas:
-
         db.session.delete(tarea)  # Elimina cada tarea de la lista
     db.session.commit()  # Guarda los cambios
-    return jsonify({"message": "Todas las tareas han sido eliminadas"}), 200  # Devuelve un mensaje de éxito
-
-
-
-
+    
+    return jsonify({"success": True, "msg": "Todas las tareas han sido eliminadas satisfactoriamente"}), 200  # Mensaje de éxito
 

@@ -4,28 +4,32 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
-#Guarda la información de los usuarios. Cada usuario tiene un id, un email, una password y un campo is_active para saber si su cuenta está activa.
+#Guarda la información. Cada usuario tiene un id, un email, una password y un campo is_active para saber si su cuenta está activa.
 
 class User(db.Model):
+    __tablename__ = "user"
 
-    __tablename__ = "user"  # Nombre de la tabla en la base de datos
-
-    id = db.Column (db.Integer(), primary_key=True)
+    id = db.Column(db.Integer(), primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(256), unique=False, nullable=False) # cambio a 256, la contraseña hasheada que intenta guardar supera la longitud máxima permitida para la columna password
-    photo = db.Column(db.String(250), unique=False, nullable=True) #(nullable=True), por lo que si el usuario no quiere subir una foto
+    password = db.Column(db.String(256), unique=False, nullable=False)
+    photo = db.Column(db.String(250), unique=False, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
+
+    # Definición de la relación con Tarea
+    tareas = db.relationship('Tarea', backref='user', lazy=True)
+
 
 
     def serialize(self):
         return {
             "id": self.id,
             "email": self.email,
-            "photo": self.photo,  # Incluir la foto en la serialización
-            # do not serialize the password, its a security breach
+            "photo": self.photo,
         }
+
     def __repr__(self):
         return f'<User {self.email}>'
+
 
 
   # Nuevo modelo para Tareas.
@@ -36,6 +40,7 @@ class Tarea(db.Model):
 
     id = db.Column(db.Integer(), primary_key=True)
     label = db.Column(db.String(120), nullable=False)  # Texto de la tarea
+    descripcion = db.Column(db.String(255), nullable=True)  # Descripción opcional de la tarea
     done = db.Column(db.Boolean, default=False)  # Si la tarea está completada o no
     user_id = db.Column(db.Integer(), db.ForeignKey('user.id'), nullable=False)  # Relación con la tabla 'users'
 
@@ -43,6 +48,7 @@ class Tarea(db.Model):
         return {
             "id": self.id,
             "label": self.label,
+            "descripcion": self.descripcion,
             "done": self.done,
             "user_id": self.user_id
         }  

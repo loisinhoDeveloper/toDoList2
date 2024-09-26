@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Context } from "../store/appContext"; // Importamos el contexto global
 
-const ToDoLis = () => {
+const ToDoList = () => {
     const { store, actions } = useContext(Context); // Usamos el contexto
     const [tarea, setTarea] = useState(""); // Estado para la nueva tarea
+    const [editarId, setEditarId] = useState(null); // ID de la tarea a editar
+    const [nuevoTitulo, setNuevoTitulo] = useState(""); // Nuevo título
+    const [nuevaDescripcion, setNuevaDescripcion] = useState(""); // Nueva descripción
 
-    useEffect(() => { // useEffect para cargar las tareas y crear usuario si no existe
-        actions.crearUsuario(); // Crea el usuario
-        actions.obtenerTareas(); // Obtiene las tareas
-    }, []);
+    useEffect(() => {
+        if (store.user && store.user.id) {
+            actions.obtenerTareas();  //cuando el usuario está autenticado, se llama a la acción obtenerTareas que está en el flux.js
+        }
+    }, [store.user]); 
 
     const añadirTarea = () => {
         if (tarea.trim() !== "") {
@@ -16,6 +20,19 @@ const ToDoLis = () => {
             actions.añadirTarea(nuevaTarea); // Añade la tarea usando Flux
             setTarea(""); // Limpia el input
         }
+    };
+
+    const actualizarTarea = (id) => { //Captura el nuevo título y descripción.
+        const datosActualizados = { 
+            label: nuevoTitulo,  // El nuevo título que el usuario escribió (tarea)
+            descripcion: nuevaDescripcion // La nueva descripción
+        }; 
+    
+        actions.actualizarTarea(id, datosActualizados); // Enviar datos a través del flux.js al backend para actualizar la tarea.
+        setEditarId(null); // Resetea el modo edición
+        setNuevoTitulo(""); // Limpia el nuevo título
+        setNuevaDescripcion(""); // Limpia la nueva descripción
+
     };
 
     return (
@@ -29,14 +46,35 @@ const ToDoLis = () => {
             />
             <button onClick={añadirTarea} className="btn btn-primary ms-2">Añadir</button>
             <ul className="list-group mt-3">
-                {Array.isArray(store.todos) && store.todos.map((tarea, index) => ( //Asegura que store.todos es una lista antes de intentar mostrarla y toma cada tarea de la lista y crea un elemento de lista para ella.
-                    <li key={tarea.id || index} className="list-group-item d-flex justify-content-between align-items-center"> {/* un identificador único para cada tarea para ayudar a React */}
-                        {tarea.label}
-                                    <button onClick={() => {
-                                        console.log("ID de la tarea:", tarea.id); // Verificar el ID aquí
-                                        actions.eliminarTarea(index, tarea.id);
-                                    }} className="btn btn-danger">Eliminar</button>
-
+                {Array.isArray(store.todos_user) && store.todos_user.map((tarea, index) => (
+                    <li key={tarea.id || index} className="list-group-item d-flex justify-content-between align-items-center">
+                        {editarId === tarea.id ? (
+                            <>
+                                <input
+                                    type="text"
+                                    placeholder="Nuevo título"
+                                    value={nuevoTitulo}
+                                    onChange={(e) => setNuevoTitulo(e.target.value)}
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Nueva descripción"
+                                    value={nuevaDescripcion}
+                                    onChange={(e) => setNuevaDescripcion(e.target.value)}
+                                />
+                                <button onClick={() => actualizarTarea(tarea.id)} className="btn btn-success">Guardar</button>
+                                <button onClick={() => setEditarId(null)} className="btn btn-secondary">Cancelar</button> {/* restablece el estado editarId a null*/}
+                            </>
+                        ) : (
+                            <>
+                                {tarea.label}
+                                <button onClick={() => setEditarId(tarea.id)} className="btn btn-warning">Editar</button>
+                                <button onClick={() => {
+                                    console.log("ID de la tarea:", tarea.id);
+                                    actions.eliminarTarea(index, tarea.id);
+                                }} className="btn btn-danger">Eliminar</button>
+                            </>
+                        )}
                     </li>
                 ))}
             </ul>
@@ -45,4 +83,4 @@ const ToDoLis = () => {
     );
 };
 
-export default ToDoLis;
+export default ToDoList;
