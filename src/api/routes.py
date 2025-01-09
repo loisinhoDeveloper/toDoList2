@@ -85,16 +85,33 @@ def login():
     }), 401
 
 
-# @api.route('/perfil/<int:id>', methods=['PUT'])
-# @jwt_required()
-# def editar_perfil(id):
-#     edited_user = User.query.get(id)
-#     data=request.json
-#     edited_user.email = data.get('email', None) if data.get('email') else edited_user.email
-#     edited_user.password = data.get('password', None) if data.get('password') else edited_user.password
+@api.route('/perfil/<int:id>', methods=['PUT'])
+@jwt_required()  # Esto es para asegurarse de que solo los usuarios logueados puedan editar su perfil.
+def editar_perfil(id):
+    # Obtener el usuario que quieres editar con el ID que mandamos en la URL.
+    usuario_a_editar = User.query.get(id)
 
-#     db.session.commit()
-#     return jsonify(edited_user.serialize()), 200
+    #  Si no encontramos al usuario con ese ID, le decimos que no existe.
+    if not usuario_a_editar:
+        return jsonify({"message": "Usuario no encontrado"}), 404
+
+    #  Obtener los datos nuevos que vienen de la solicitud (como el email o la contraseña).
+    data = request.json
+
+    #  Actualizar el email solo si el usuario mandó uno nuevo.
+    if 'email' in data:
+        usuario_a_editar.email = data['email']
+    
+    # Actualizar la contraseña solo si el usuario mandó una nueva.
+    if 'password' in data:
+        usuario_a_editar.password = data['password']
+
+    # 6. Guardar los cambios en la base de datos.
+    db.session.commit()
+
+    # 7. Devolver la información del usuario ya actualizada.
+    return jsonify(usuario_a_editar.serialize()), 200
+
 
 
 #AÑADIR TAREA
@@ -194,8 +211,6 @@ def actualizar_tarea(tarea_id):
 
 
 
-
-
 # Endpoint para eliminar una tarea
 @api.route('/tareas/<int:tarea_id>', methods=['DELETE'])
 @jwt_required()  # Solo usuarios autenticados pueden acceder
@@ -236,4 +251,5 @@ def borrar_todas_las_tareas():
     db.session.commit()  # Guarda los cambios
     
     return jsonify({"success": True, "msg": "Todas las tareas han sido eliminadas satisfactoriamente"}), 200  # Mensaje de éxito
+
 

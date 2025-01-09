@@ -12,7 +12,7 @@ import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
 import Tareas from "./pages/tareas";
 import AccesoTareas from "./component/acceso_Tareas.jsx"; //actúa como un "guardia" para la ruta que muestra Tareas (layout)
-
+import EditarPerfil from "./pages/perfil.js";
 
 
 
@@ -43,6 +43,7 @@ const Layout = () => {
                         <Route element={<Login />} path="/login" />
                         <Route element={<Signup />} path="/signup" />
                         <Route element={<AccesoTareas listaTareas={<Tareas />} />} path="/tareas" />{/* Protección para solo los logueados puedan entrar. */}
+                        <Route element={<EditarPerfil />} path="/perfil" />  {/* Agregada la ruta para EditarPerfil */}
                         <Route element={<h1>Not found!</h1>} />
                     </Routes>
                     <Footer />

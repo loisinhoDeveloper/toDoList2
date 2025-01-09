@@ -217,27 +217,32 @@ const getState = ({ getStore, getActions, setStore }) => {
             },
 
 
-			// // Sincronizar la lista de tareas actual con el servidor para una funcion de administrador, pero hay que conectar con routes.py!
-            // sincroConServidor: (actualizarTodos) => {
-            //     const BACKEND_URL = process.env.BACKEND_URL; 
+            editarPerfil: async (datosActualizados) => {
+                const BACKEND_URL = process.env.BACKEND_URL;
+                const id = getStore().usuarioLogueado.id;  // Obtener el ID del usuario actual desde el store
+                try {
+                    // Usamos el ID del usuario para construir la URL correcta para actualizar el perfil
+                    const response = await fetch(`${BACKEND_URL}/api/perfil/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${getStore().token}`, // Token de autenticación
+                        },
+                        body: JSON.stringify(datosActualizados), // Datos del perfil que estamos actualizando
+                    });
+            
+                    if (!response.ok) throw new Error(`Error: ${response.status} - ${response.statusText}`);
+            
+                    // Si la respuesta es exitosa, obtenemos los datos del usuario actualizado
+                    const usuarioActualizado = await response.json();
+                    // Actualizamos el store global con los nuevos datos del usuario
+                    setStore({ usuarioLogueado: usuarioActualizado });
+            
+                } catch (error) {
+                    console.error("Error al actualizar el perfil:", error);
+                }
+            },
 
-            //     fetch(`${BACKEND_URL}/api/tareas`, {
-            //         method: "PUT",
-            //         body: JSON.stringify(actualizarTodos), // Enviamos la lista actualizada de tareas al servidor
-            //         headers: {
-            //             "Content-Type": "application/json",
-            //             "Authorization": `Bearer ${getStore().token}` // Añadir el token JWT
-            //         }
-            //     })
-            //     .then(response => {
-            //         if (!response.ok) {
-            //             throw new Error('Error al sincronizar con el servidor');
-            //         }
-            //         return response.json();
-            //     })
-            //     .then(data => console.log("Lista sincronizada con el servidor:", data))
-            //     .catch(error => console.log("Error al sincronizar con el servidor: ", error));
-            // },
 			
 		}
 	};
